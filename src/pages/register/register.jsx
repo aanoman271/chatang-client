@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { Link } from "react-router";
+import signupUser from "../../apiCalls/auth";
+import toast from "react-hot-toast";
 
 const Register = () => {
   // 1. Initialize state for the form fields
@@ -19,8 +22,23 @@ const Register = () => {
   };
 
   // 3. Handle form submission and console log the fields
-  const handleSubmit = (e) => {
-    e.preventDefault(); // Prevents the page from refreshing
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await signupUser(formData);
+
+      if (response?.success) {
+        toast.success(response.message);
+      } else {
+        toast.error(response?.message || "Signup failed!");
+      }
+    } catch (err) {
+      const errorMsg =
+        err.response?.data?.message || err.message || "Something went wrong!";
+      toast.error(errorMsg);
+    }
+
     console.log("Form Submitted Data:", formData);
   };
 
@@ -71,7 +89,7 @@ const Register = () => {
         <div className="card_terms">
           <span>
             Already have an account?
-            <a href="#login">Login Here</a>
+            <Link to="/login">Login Here</Link>
           </span>
         </div>
       </div>

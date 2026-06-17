@@ -1,6 +1,10 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router";
+import { signinUser } from "../../apiCalls/auth";
+import toast from "react-hot-toast";
 
 const Login = () => {
+  const navigate = useNavigate();
   // 1. Initialize state for email and password
   const [credentials, setCredentials] = useState({
     email: "",
@@ -17,9 +21,25 @@ const Login = () => {
   };
 
   // 3. Handle submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login Credentials Submitted:", credentials);
+
+    try {
+      const response = await signinUser(credentials);
+
+      if (response?.success) {
+        toast.success(response.message || "Signed in successfully!");
+        localStorage.setItem("token", response.token);
+        navigate("/");
+      } else {
+        toast.error(response?.message || "Signin failed!");
+      }
+    } catch (err) {
+      // ব্যাকএন্ড থেকে আসা আসল মেসেজটি আগে চেক করবে
+      const errorMsg =
+        err.response?.data?.message || err.message || "Something went wrong!";
+      toast.error(errorMsg);
+    }
   };
 
   return (
@@ -52,7 +72,7 @@ const Login = () => {
         <div className="card_terms">
           <span>
             Don't have an account yet?
-            <a href="#signup">Signup Here</a>
+            <Link to="/register">Signup Here</Link>
           </span>
         </div>
       </div>
