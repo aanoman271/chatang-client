@@ -2,9 +2,12 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { signinUser } from "../../apiCalls/auth";
 import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { showLoader, hideLoader } from "../../redux/loaderSlice";
 
 const Login = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   // 1. Initialize state for email and password
   const [credentials, setCredentials] = useState({
     email: "",
@@ -25,20 +28,23 @@ const Login = () => {
     e.preventDefault();
 
     try {
+      dispatch(showLoader());
       const response = await signinUser(credentials);
 
       if (response?.success) {
         toast.success(response.message || "Signed in successfully!");
         localStorage.setItem("token", response.token);
+        console.log(response);
         navigate("/");
       } else {
         toast.error(response?.message || "Signin failed!");
       }
     } catch (err) {
-      // ব্যাকএন্ড থেকে আসা আসল মেসেজটি আগে চেক করবে
       const errorMsg =
         err.response?.data?.message || err.message || "Something went wrong!";
       toast.error(errorMsg);
+    } finally {
+      dispatch(hideLoader());
     }
   };
 

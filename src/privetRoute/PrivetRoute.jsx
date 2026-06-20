@@ -2,11 +2,17 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { getLoggedUser } from "../apiCalls/user";
 import toast from "react-hot-toast";
+import { useSelector, useDispatch } from "react-redux";
+import { setUser } from "../redux/userSlice";
+import Loader from "../components/Loader";
 
 const PrivateRoute = ({ children }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const [user, setUser] = useState(null);
+  const { user } = useSelector((state) => state.user);
+
+  console.log("after", user);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,7 +28,7 @@ const PrivateRoute = ({ children }) => {
         const response = await getLoggedUser();
 
         if (response.success) {
-          setUser(response.data);
+          dispatch(setUser(response.data));
         } else {
           navigate("/login");
         }
@@ -38,10 +44,9 @@ const PrivateRoute = ({ children }) => {
     };
 
     fetchUser();
-  }, [navigate]);
-
+  }, [navigate, dispatch]);
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loader></Loader>;
   }
 
   return user ? (

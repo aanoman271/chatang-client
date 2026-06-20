@@ -1,9 +1,13 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import signupUser from "../../apiCalls/auth";
 import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { hideLoader, showLoader } from "../../redux/loaderSlice";
 
 const Register = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   // 1. Initialize state for the form fields
   const [formData, setFormData] = useState({
     firstName: "",
@@ -26,10 +30,12 @@ const Register = () => {
     e.preventDefault();
 
     try {
+      dispatch(showLoader());
       const response = await signupUser(formData);
 
       if (response?.success) {
         toast.success(response.message);
+        navigate("/login");
       } else {
         toast.error(response?.message || "Signup failed!");
       }
@@ -37,6 +43,8 @@ const Register = () => {
       const errorMsg =
         err.response?.data?.message || err.message || "Something went wrong!";
       toast.error(errorMsg);
+    } finally {
+      dispatch(hideLoader());
     }
 
     console.log("Form Submitted Data:", formData);
